@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <table>
+        <tr valign="top">
+            <td>
+                <img src="{{ image }}" width="150">
+            </td>
+            <td>
+                <h1>{{ user.username }}</h1>
+                <p>{{ user.email }}</p>
+                {% if user == current_user %}
+                <p>
+                    <a href="{{ url_for('main.edit_profile') }}">Edit Your Profile</a>
+                </p>
+                {% endif %}
+            </td>
+        </tr>
+    </table>
+    <hr>
+{% endblock %}

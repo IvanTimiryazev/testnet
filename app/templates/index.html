@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<form action="" method="post">
+    {{ form.hidden_tag() }}
+    <p>
+        {{ form.accounts.label }}
+        {{ form.accounts(cols=32, rows=4) }}
+        {% for error in form.accounts.errors %}
+        <span style="color: black;">{{ error }}</span>
+        {% endfor %}
+    </p>
+    <p>
+        {{ form.submit() }}
+    </p>
+</form>
+<hr>
+{% if tweeter_accounts %}
+{% for t in tweeter_accounts %}
+    <p>
+        {{ t }}
+    </p>
+{% endfor %}
+{% endif %}
+<hr>
+{% if parsed_accounts %}
+{% for p in parsed_accounts %}
+    <ul>
+        <li>{{ p.content }} - {{ p.url }}</li>
+    </ul>
+{% endfor %}
+{% endif %}
+{% endblock %}
+
