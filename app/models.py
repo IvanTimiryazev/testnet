@@ -25,12 +25,7 @@ class Users(UserMixin, db.Model):
 
     def user_tweeter_accounts(self):
         s = [i.account for i in Source.query.filter_by(user_id=self.id).order_by(Source.created.desc())]
-        accounts = []
-        for j in s:
-            j = j.split()
-            for k in j:
-                res = re.sub(r',|@', '', k)
-                accounts.append(res)
+        accounts = [re.sub(r',|@', '', a) for a in s]
         return accounts
 
 

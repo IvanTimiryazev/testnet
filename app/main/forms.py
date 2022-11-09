@@ -26,6 +26,5 @@ class EditProfileForm(FlaskForm):
 
 
 class TwitterAccountsForm(FlaskForm):
-    accounts = TextAreaField(
-        'Input Tweeter Accounts. Like @TweetsOfCats, @We_Like_Dogs, ...etc', validators=[DataRequired(), Length(min=1)])
-    submit = SubmitField('Save Accounts')
+    accounts = StringField('Input @TwitterAccount', validators=[DataRequired()])
+    submit = SubmitField('Save')

@@ -8,8 +8,16 @@ from app.models import Users, Source
 from app.main.forms import EditProfileForm, TwitterAccountsForm
 from app.parse import scrap
 
-from flask import render_template, url_for, flash, redirect, request
+from flask import render_template, url_for, flash, redirect, request, jsonify
 from flask_login import login_required, current_user
+
+
+@bp.route('/process', methods=['GET'])
+def parser():
+    tweeter_accounts = current_user.user_tweeter_accounts()
+    parsed_tweets = scrap(tweeter_accounts)
+    for i in parsed_tweets:
+        return jsonify({'output': i['content']})
 
 
 @bp.route('/', methods=['GET', 'POST'])
@@ -21,11 +29,10 @@ def index():
         db.session.add(source)
         db.session.commit()
         flash('Accs been saved')
-        # return redirect('main.index')
+        return redirect(url_for('main.index'))
     tweeter_accounts = current_user.user_tweeter_accounts()
-    parsed_accounts = scrap(tweeter_accounts)
     return render_template(
-        'index.html', title='Home page', form=form, tweeter_accounts=tweeter_accounts, parsed_accounts=parsed_accounts)
+        'index.html', title='Home page', form=form, tweeter_accounts=tweeter_accounts)
 
 
 @bp.route('/user/<username>')

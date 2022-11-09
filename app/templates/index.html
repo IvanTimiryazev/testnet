@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
 
 {% block content %}
 <form action="" method="post">
@@ -20,15 +21,26 @@
     <p>
         {{ t }}
     </p>
+{{ parsed_tweets }}
 {% endfor %}
 {% endif %}
-<hr>
-{% if parsed_accounts %}
-{% for p in parsed_accounts %}
-    <ul>
-        <li>{{ p.content }} - {{ p.url }}</li>
-    </ul>
-{% endfor %}
-{% endif %}
+<button id="butt">Get the tweets!</button>
+<div id="answer"></div>
+{% endblock %}
+
+{% block script %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('#butt').click(function() {
+            $.ajax({
+                url: '/process',
+                type: 'GET'
+            }).done(function(data) {
+                $('#answer').text(data.output)
+            });
+        });
+    });
+</script>
 {% endblock %}
 

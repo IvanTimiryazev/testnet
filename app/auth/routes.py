@@ -47,7 +47,7 @@ def register():
         if not os.path.exists(full_path):
             os.mkdir(full_path)
         flash('Вы зарегистрированы!')
-        return redirect(url_for('main.index'))
+        return redirect(url_for('auth.login'))
     return render_template('auth/register.html', title='Регистрация', form=form)
 
 

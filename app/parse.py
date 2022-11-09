@@ -3,7 +3,7 @@ import snscrape.modules.twitter as snstwitter
 
 tweets = []
 limit = 30
-regex = r'^(?=.*(forget)).*$'
+regex = r'^(?=.*(yankees)).*$'
 
 
 def scrap(sources: list):
@@ -29,6 +29,7 @@ def parser(tweets):
         parse_result = re.match(regex, raw_text)
         if parse_result:
             matched.append(i)
+    print(matched)
     return matched
 
 
