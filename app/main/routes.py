@@ -8,7 +8,7 @@ from app.models import Users, Source
 from app.main.forms import EditProfileForm, TwitterAccountsForm
 from app.parse import scrap
 
-from flask import render_template, url_for, flash, redirect, request, jsonify
+from flask import render_template, url_for, flash, redirect, request, jsonify, abort
 from flask_login import login_required, current_user
 
 
@@ -22,6 +22,7 @@ def parser():
 
 @bp.route('/', methods=['GET', 'POST'])
 @bp.route('/index', methods=['GET', 'POST'])
+@login_required
 def index():
     form = TwitterAccountsForm()
     if form.validate_on_submit():
@@ -40,6 +41,8 @@ def index():
 def user_page(username):
     form = EditProfileForm()
     user = Users.query.filter_by(username=username).first_or_404()
+    if current_user.username != username:
+        abort(401)
     image_file = url_for('static', filename='profile_files/profile_pics/' + user.image_file)
     return render_template('user_page.html', user=user, image=image_file, title=current_user.username, form=form)
 
