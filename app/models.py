@@ -1,8 +1,13 @@
 import re
-from app import db, login
+import jwt
+from time import time
 from datetime import datetime
 from flask_login import UserMixin
+from flask import current_app
 from werkzeug.security import generate_password_hash, check_password_hash
+
+import app
+from app import db, login
 
 
 class Users(UserMixin, db.Model):
@@ -27,6 +32,21 @@ class Users(UserMixin, db.Model):
         s = [i.account for i in Source.query.filter_by(user_id=self.id).order_by(Source.created.desc())]
         accounts = [re.sub(r',|@', '', a) for a in s]
         return accounts
+
+    def get_reset_password_token(self, expires_in=600):
+        return jwt.encode(
+            {'reset_password.txt': self.id, 'exp': time() + expires_in},
+            current_app.config['SECRET_KEY'], algorithm='HS256')
+
+    @staticmethod
+    def verify_reset_password_token(token):
+        try:
+            id = jwt.decode(
+                token, current_app.config['SECRET_KEY'],
+                algorithms=['HS256'])['reset_password.txt']
+        except:
+            return
+        return Users.query.get(id)
 
 
 class Source(db.Model):
