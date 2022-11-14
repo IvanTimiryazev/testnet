@@ -5,3 +5,4 @@ venv/
 .env
 logging.log
 /app/static/profile_files/profile_pics/
+/logs/
