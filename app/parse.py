@@ -3,10 +3,9 @@ import snscrape.modules.twitter as snstwitter
 
 tweets = []
 limit = 30
-regex = r'^(?=.*(yankees)).*$'
 
 
-def scrap(sources: list):
+def scrap(sources: list, regs):
     for acc in sources:
         count = 0
         print(acc)
@@ -18,10 +17,15 @@ def scrap(sources: list):
             else:
                 tweets.append({'url': tweet.url, 'content': tweet.content})
     print(tweets)
-    return parser(tweets)
+    return parser(tweets, regs)
 
 
-def parser(tweets):
+def parser(tweets, regs):
+    print(regs)
+    r = '|'.join(regs)
+    print(r)
+    regex = fr'^(?=.*({r})).*$'
+    print(regex)
     matched = []
     for i in tweets:
         raw_text = i['content'].split()

@@ -4,8 +4,8 @@ from PIL import Image
 
 from app import db
 from app.main import bp
-from app.models import Users, Source
-from app.main.forms import EditProfileForm, TwitterAccountsForm
+from app.models import Users, Source, UsersRegex
+from app.main.forms import EditProfileForm, TwitterAccountsForm, DeleteForm, RegexForm
 from app.parse import scrap
 
 from flask import render_template, url_for, flash, redirect, request, jsonify, abort
@@ -15,9 +15,9 @@ from flask_login import login_required, current_user
 @bp.route('/process', methods=['GET'])
 def parser():
     tweeter_accounts = current_user.user_tweeter_accounts()
-    parsed_tweets = scrap(tweeter_accounts)
-    for i in parsed_tweets:
-        return jsonify({'output': i['content']})
+    regs = current_user.user_regs()
+    parsed_tweets = scrap(tweeter_accounts, regs)
+    return jsonify({'output': parsed_tweets})
 
 
 @bp.route('/', methods=['GET', 'POST'])
@@ -32,8 +32,26 @@ def index():
         flash('Accs been saved')
         return redirect(url_for('main.index'))
     tweeter_accounts = current_user.user_tweeter_accounts()
+    form2 = DeleteForm()
+    if form2.validate_on_submit():
+        if current_user.accounts.filter_by(account=form2.account.data).first():
+            current_user.remove_tweeter_account(form2.account.data)
+            db.session.commit()
+            flash('Account has been deleted!')
+            return redirect(url_for('main.index'))
+        else:
+            flash('There is not such Account')
+    form3 = RegexForm()
+    if form3.validate_on_submit():
+        regex = UsersRegex(regex=form3.regex.data, author=current_user)
+        db.session.add(regex)
+        db.session.commit()
+        flash('Rer been saved')
+        return redirect(url_for('main.index'))
+    regs = current_user.user_regs()
+    print(regs)
     return render_template(
-        'index.html', title='Home page', form=form, tweeter_accounts=tweeter_accounts)
+        'index.html', title='Home page', form=form, tweeter_accounts=tweeter_accounts, form2=form2, form3=form3, regs=regs)
 
 
 @bp.route('/user/<username>')
@@ -76,5 +94,17 @@ def edit_profile():
         form.username.data = current_user.username
         form.email.data = current_user.email
     return render_template('edit_profile.html', title='Edit Profile', form=form)
+
+
+# @bp.route('/delete_accounts', methods=['GET', 'POST'])
+# def delete():
+#     form = DeleteForm()
+#     if form.validate_on_submit():
+#         current_user.remove_tweeter_account(form.account.data)
+#         db.session.commit()
+#         flash('Account has been deleted!')
+#         return redirect(url_for('main.index'))
+#     return render_template()
+
 
 

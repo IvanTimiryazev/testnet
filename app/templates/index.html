@@ -21,9 +21,37 @@
     <p>
         {{ t }}
     </p>
-{{ parsed_tweets }}
 {% endfor %}
 {% endif %}
+<form action="" method="post">
+    {{ form2.hidden_tag() }}
+    <p>
+        {{ form2.account.label }}
+        {{ form2.account(size=32) }}
+        {% for error in form2.account.errors %}
+        <span style="color: red;">{{ error }}</span>
+        {% endfor %}
+    </p>
+    <p>{{ form2.submit() }}</p>
+</form>
+<hr>
+<form action="" method="post">
+    {{ form3.hidden_tag() }}
+    <p>
+        {{ form3.regex.label }}
+        {{ form3.regex(size=32) }}
+        {% for error in form3.regex.errors %}
+        <span style="color: red;">{{ error }}</span>
+        {% endfor %}
+    </p>
+    <p>{{ form3.submit() }}</p>
+</form>
+{% if regs %}
+{% for r in regs %}
+    <p>{{ r }}</p>
+{% endfor %}
+{% endif %}
+<hr>
 <button id="butt">Get the tweets!</button>
 <div id="answer"></div>
 {% endblock %}
@@ -31,7 +59,7 @@
 {% block script %}
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
 <script>
-    $(document).ready(function() {
+   $(document).ready(function() {
         $('#butt').click(function() {
             $.ajax({
                 url: '/process',

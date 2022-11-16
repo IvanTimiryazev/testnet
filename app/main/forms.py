@@ -2,7 +2,7 @@ from flask_wtf import FlaskForm
 from flask_wtf.file import FileAllowed
 from wtforms import StringField, SubmitField, PasswordField, FileField, TextAreaField
 from wtforms.validators import DataRequired, Email, EqualTo, ValidationError, Length
-from app.models import Users
+from app.models import Users, UsersRegex
 from flask_login import current_user
 
 
@@ -28,3 +28,14 @@ class EditProfileForm(FlaskForm):
 class TwitterAccountsForm(FlaskForm):
     accounts = StringField('Input @TwitterAccount', validators=[DataRequired()])
     submit = SubmitField('Save')
+
+
+class DeleteForm(FlaskForm):
+    account = StringField('Account to Delete', validators=[DataRequired()])
+    submit = SubmitField('Delete')
+
+
+class RegexForm(FlaskForm):
+    regex = StringField('Add the Key', validators=[DataRequired()])
+    submit = SubmitField('Save')
+

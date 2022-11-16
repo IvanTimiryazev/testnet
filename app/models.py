@@ -4,7 +4,7 @@ from time import time
 from datetime import datetime
 
 from flask_login import UserMixin
-from flask import current_app
+from flask import current_app, flash
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from app import db, login
@@ -18,6 +18,7 @@ class Users(UserMixin, db.Model):
     phone_number = db.Column(db.String(50))
     image_file = db.Column(db.String(100), nullable=False, default='default.jpg')
     accounts = db.relationship('Source', backref='author', lazy='dynamic')
+    regs = db.relationship('UsersRegex', backref='author', lazy='dynamic')
 
     def __repr__(self):
         return f'<User: {self.username}, Email: {self.email}>'
@@ -33,8 +34,12 @@ class Users(UserMixin, db.Model):
         accounts = [re.sub(r',|@', '', a) for a in s]
         return accounts
 
-    def remove_tweeter_account(self):
-        pass
+    def user_regs(self):
+        regs = [i.regex.lower().strip() for i in UsersRegex.query.filter_by(user_id=self.id).order_by(UsersRegex.created.desc())]
+        return regs
+
+    def remove_tweeter_account(self, account):
+        self.accounts.filter_by(account=account).delete()
 
     def get_reset_password_token(self, expires_in=600):
         return jwt.encode(
@@ -60,6 +65,16 @@ class Source(db.Model):
 
     def __repr__(self):
         return f'<Acc: {self.account}>'
+
+
+class UsersRegex(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    regex = db.Column(db.String(100))
+    created = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+
+    def __repr__(self):
+        return f'<Regex: {self.regex}>'
 
 
 @login.user_loader
