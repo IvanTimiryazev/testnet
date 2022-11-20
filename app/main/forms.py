@@ -39,3 +39,11 @@ class RegexForm(FlaskForm):
     regex = StringField('Add the Key', validators=[DataRequired()])
     submit = SubmitField('Save')
 
+    def validate_regex(self, regex):
+        reg = current_user.regs.filter_by(regex=regex.data).first()
+        if reg is not None:
+            raise ValidationError('That key is already there')
+
+
+
+

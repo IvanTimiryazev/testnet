@@ -15,25 +15,11 @@
         {{ form.submit() }}
     </p>
 </form>
-<hr>
-{% if tweeter_accounts %}
-{% for t in tweeter_accounts %}
-    <p>
-        {{ t }}
-    </p>
-{% endfor %}
-{% endif %}
-<form action="" method="post">
-    {{ form2.hidden_tag() }}
-    <p>
-        {{ form2.account.label }}
-        {{ form2.account(size=32) }}
-        {% for error in form2.account.errors %}
-        <span style="color: red;">{{ error }}</span>
-        {% endfor %}
-    </p>
-    <p>{{ form2.submit() }}</p>
-</form>
+
+
+<ul id="accountList"></ul>
+
+
 <hr>
 <form action="" method="post">
     {{ form3.hidden_tag() }}
@@ -46,11 +32,9 @@
     </p>
     <p>{{ form3.submit() }}</p>
 </form>
-{% if regs %}
-{% for r in regs %}
-    <p>{{ r }}</p>
-{% endfor %}
-{% endif %}
+
+<ul id="keysList"></ul>
+
 <hr>
 <button id="butt">Get the tweets!</button>
 <div id="answer"></div>
@@ -58,6 +42,17 @@
 
 {% block script %}
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+<script src="http://ajax.microsoft.com/ajax/jquery.templates/beta1/jquery.tmpl.min.js"></script>
+<script id="accountTemplate">
+    <li>${account} (${id} - id)</li>
+</script>
+
+<script id="keysTemplate">
+    <li>${regex} (${id} - id)</li>
+</script>
+
+
+
 <script>
    $(document).ready(function() {
         $('#butt').click(function() {
@@ -69,6 +64,43 @@
             });
         });
     });
+
+
+   $(document).ready(function() {
+        $('.btn').click(function() {
+            var id = $(this).attr('id');
+            $.ajax({
+                url: '/delete_accounts',
+                type: 'GET',
+                data: {'id': id}
+            }).done(function(data) {
+                $('.tw').text(data.output)
+            });
+        });
+    });
+
+  $(document).ready(function() {
+       $.ajax({
+           url: '/get_accounts',
+           type: 'GET'
+       }).done(function(res) {
+           var accountObj = JSON.parse(res);
+           $('#accountTemplate').tmpl(accountObj).appendTo( "#accountList" );
+       });
+  });
+
+  $(document).ready(function() {
+       $.ajax({
+           url: '/get_keys',
+           type: 'GET'
+       }).done(function(res) {
+           var keysObj = JSON.parse(res);
+           $('#keysTemplate').tmpl(keysObj).appendTo( "#keysList" );
+       });
+  });
+
+
 </script>
+
 {% endblock %}
 

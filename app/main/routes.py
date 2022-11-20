@@ -8,13 +8,13 @@ from app.models import Users, Source, UsersRegex
 from app.main.forms import EditProfileForm, TwitterAccountsForm, DeleteForm, RegexForm
 from app.parse import scrap
 
-from flask import render_template, url_for, flash, redirect, request, jsonify, abort
+from flask import render_template, url_for, flash, redirect, request, jsonify, abort, json
 from flask_login import login_required, current_user
 
 
 @bp.route('/process', methods=['GET'])
 def parser():
-    tweeter_accounts = current_user.user_tweeter_accounts()
+    tweeter_accounts = current_user.user_tweeter_accounts_for_p()
     regs = current_user.user_regs()
     parsed_tweets = scrap(tweeter_accounts, regs)
     return jsonify({'output': parsed_tweets})
@@ -26,32 +26,26 @@ def parser():
 def index():
     form = TwitterAccountsForm()
     if form.validate_on_submit():
-        source = Source(account=form.accounts.data, author=current_user)
-        db.session.add(source)
-        db.session.commit()
-        flash('Accs been saved')
-        return redirect(url_for('main.index'))
-    tweeter_accounts = current_user.user_tweeter_accounts()
-    form2 = DeleteForm()
-    if form2.validate_on_submit():
-        if current_user.accounts.filter_by(account=form2.account.data).first():
-            current_user.remove_tweeter_account(form2.account.data)
+        if not current_user.accounts.filter_by(account=form.accounts.data).first():
+            source = Source(account=form.accounts.data, author=current_user)
+            db.session.add(source)
             db.session.commit()
-            flash('Account has been deleted!')
+            flash('Accs been saved')
             return redirect(url_for('main.index'))
         else:
-            flash('There is not such Account')
+            flash('That Account Is Already There')
     form3 = RegexForm()
     if form3.validate_on_submit():
-        regex = UsersRegex(regex=form3.regex.data, author=current_user)
-        db.session.add(regex)
-        db.session.commit()
-        flash('Rer been saved')
-        return redirect(url_for('main.index'))
-    regs = current_user.user_regs()
-    print(regs)
+        if len(current_user.regs.all()) <= 9:
+            regex = UsersRegex(regex=form3.regex.data, author=current_user)
+            db.session.add(regex)
+            db.session.commit()
+            flash('Regex has been saved')
+            return redirect(url_for('main.index'))
+        else:
+            flash('You cant add more than 10 keys')
     return render_template(
-        'index.html', title='Home page', form=form, tweeter_accounts=tweeter_accounts, form2=form2, form3=form3, regs=regs)
+        'index.html', title='Home page', form=form, form3=form3)
 
 
 @bp.route('/user/<username>')
@@ -96,15 +90,31 @@ def edit_profile():
     return render_template('edit_profile.html', title='Edit Profile', form=form)
 
 
-# @bp.route('/delete_accounts', methods=['GET', 'POST'])
-# def delete():
-#     form = DeleteForm()
-#     if form.validate_on_submit():
-#         current_user.remove_tweeter_account(form.account.data)
-#         db.session.commit()
-#         flash('Account has been deleted!')
-#         return redirect(url_for('main.index'))
-#     return render_template()
+@bp.route('/delete_accounts', methods=['GET', 'POST'])
+def delete():
+    id = request.args.get('id')
+    print(id)
+    if current_user.accounts.filter_by(id=id).first():
+        current_user.remove_tweeter_account(id)
+        db.session.commit()
+        flash('Account has been deleted!')
+    tweeter_accounts = current_user.user_tweeter_accounts()
+    return jsonify({'output': id})
 
+
+@bp.route('/get_accounts', methods=['GET', 'POST'])
+def get_accounts():
+    result = current_user.user_tweeter_accounts()
+    accounts_dict = [{'id': i.id, 'account': i.account} for i in result]
+    print(accounts_dict)
+    return json.dumps(accounts_dict)
+
+
+@bp.route('/get_keys', methods=['GET', 'POST'])
+def get_keys():
+    result = current_user.user_regs()
+    keys_dict = [{'id': i.id, 'regex': i.regex} for i in result]
+    print(keys_dict)
+    return json.dumps(keys_dict)
 
 

@@ -30,16 +30,24 @@ class Users(UserMixin, db.Model):
         return check_password_hash(self.password_hash, password)
 
     def user_tweeter_accounts(self):
+        s = [i for i in Source.query.filter_by(user_id=self.id).order_by(Source.created.desc())]
+        return s
+
+    def user_tweeter_accounts_for_p(self):
         s = [i.account for i in Source.query.filter_by(user_id=self.id).order_by(Source.created.desc())]
         accounts = [re.sub(r',|@', '', a) for a in s]
+        print(accounts)
         return accounts
 
     def user_regs(self):
-        regs = [i.regex.lower().strip() for i in UsersRegex.query.filter_by(user_id=self.id).order_by(UsersRegex.created.desc())]
+        regs = [i for i in UsersRegex.query.filter_by(user_id=self.id).order_by(UsersRegex.created.desc())]
         return regs
 
-    def remove_tweeter_account(self, account):
-        self.accounts.filter_by(account=account).delete()
+    def remove_tweeter_account(self, id):
+        self.accounts.filter_by(id=id).delete()
+
+    def remove_users_regex(self):
+        pass
 
     def get_reset_password_token(self, expires_in=600):
         return jwt.encode(
