@@ -37,49 +37,63 @@
 
 <hr>
 <button id="butt">Get the tweets!</button>
-<div id="answer"></div>
+
+
+
+<ul id="tweetsList"></ul>
+
+
 {% endblock %}
 
 {% block script %}
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
 <script src="http://ajax.microsoft.com/ajax/jquery.templates/beta1/jquery.tmpl.min.js"></script>
-<script id="accountTemplate">
-    <li>${account} (${id} - id)</li>
+<script id="accountTemplate" type="text/x-jQuery-tmpl">
+    <li class="list-group-item">
+        ${account} - ${id} <button data-id=${id} class="test" onclick="DeleteAccounts(this)">del</button>
+    </li>
 </script>
 
 <script id="keysTemplate">
-    <li>${regex} (${id} - id)</li>
+    <li class="list-group-item">
+        ${regex} - ${id} <button data-id=${id} class="test" onclick="DeleteKeys(this)">del</button>
+    </li>
 </script>
 
+<script id="tweetsTemplate">
+    <li>${content} <a href='${url}'></a> </li>
+
+</script>
 
 
 <script>
    $(document).ready(function() {
-        $('#butt').click(function() {
-            $.ajax({
-                url: '/process',
-                type: 'GET'
-            }).done(function(data) {
-                $('#answer').text(data.output)
-            });
-        });
-    });
+       $('#butt').click(function() {
+           $.ajax({
+               url: '/process',
+               type: 'GET'
+           }).done(function(res) {
+               var tweetsObj = JSON.parse(res);
+               $('#tweetsTemplate').tmpl(tweetsObj).appendTo( "#tweetsList" );
+           });
+       });
+   });
+
+
+   function GetBlogs() {
+       $.ajax({
+           url: '/get_accounts',
+           type: 'GET',
+           success: function(res) {
+               var accountObj = JSON.parse(res);
+               $( "#accountList" ).empty();
+               $('#accountTemplate').tmpl(accountObj).appendTo( "#accountList" );
+           }
+       });
+   }
 
 
    $(document).ready(function() {
-        $('.btn').click(function() {
-            var id = $(this).attr('id');
-            $.ajax({
-                url: '/delete_accounts',
-                type: 'GET',
-                data: {'id': id}
-            }).done(function(data) {
-                $('.tw').text(data.output)
-            });
-        });
-    });
-
-  $(document).ready(function() {
        $.ajax({
            url: '/get_accounts',
            type: 'GET'
@@ -89,7 +103,21 @@
        });
   });
 
-  $(document).ready(function() {
+
+   function GetKeys() {
+       $.ajax({
+           url: '/get_keys',
+           type: 'GET',
+           success: function(res) {
+               var keysObj = JSON.parse(res);
+               $( "#keysList" ).empty();
+               $('#keysTemplate').tmpl(keysObj).appendTo( "#keysList" );
+           }
+       });
+   }
+
+
+   $(document).ready(function() {
        $.ajax({
            url: '/get_keys',
            type: 'GET'
@@ -98,6 +126,39 @@
            $('#keysTemplate').tmpl(keysObj).appendTo( "#keysList" );
        });
   });
+
+
+   function DeleteAccounts(elm) {
+       var id = $(elm).attr('data-id');
+       $.ajax({
+           url: '/delete_accounts',
+           data: {'id': id},
+           type: 'POST',
+           success: function(res) {
+               var result = JSON.parse(res);
+               if(result.status == 'OK') {
+                   alert('Deleted');
+                   GetBlogs();
+               }
+           }
+       });
+   }
+
+   function DeleteKeys(elm) {
+       var id = $(elm).attr('data-id');
+       $.ajax({
+           url: '/delete_keys',
+           data: {'id': id},
+           type: 'POST',
+           success: function(res) {
+               var result = JSON.parse(res);
+               if(result.status == 'OK') {
+                   alert('Deleted');
+                   GetKeys();
+               }
+           }
+       });
+   }
 
 
 </script>

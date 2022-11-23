@@ -12,14 +12,6 @@ from flask import render_template, url_for, flash, redirect, request, jsonify, a
 from flask_login import login_required, current_user
 
 
-@bp.route('/process', methods=['GET'])
-def parser():
-    tweeter_accounts = current_user.user_tweeter_accounts_for_p()
-    regs = current_user.user_regs()
-    parsed_tweets = scrap(tweeter_accounts, regs)
-    return jsonify({'output': parsed_tweets})
-
-
 @bp.route('/', methods=['GET', 'POST'])
 @bp.route('/index', methods=['GET', 'POST'])
 @login_required
@@ -37,7 +29,7 @@ def index():
     form3 = RegexForm()
     if form3.validate_on_submit():
         if len(current_user.regs.all()) <= 9:
-            regex = UsersRegex(regex=form3.regex.data, author=current_user)
+            regex = UsersRegex(regex=form3.regex.data.strip(), author=current_user)
             db.session.add(regex)
             db.session.commit()
             flash('Regex has been saved')
@@ -91,15 +83,27 @@ def edit_profile():
 
 
 @bp.route('/delete_accounts', methods=['GET', 'POST'])
-def delete():
-    id = request.args.get('id')
+def delete_accounts():
+    id = request.form['id']
     print(id)
     if current_user.accounts.filter_by(id=id).first():
         current_user.remove_tweeter_account(id)
         db.session.commit()
-        flash('Account has been deleted!')
-    tweeter_accounts = current_user.user_tweeter_accounts()
-    return jsonify({'output': id})
+        return json.dumps({'status': 'OK'})
+    else:
+        return json.dumps({'status': 'Fail'})
+
+
+@bp.route('/delete_keys', methods=['GET', 'POST'])
+def delete_keys():
+    id = request.form['id']
+    print(id)
+    if current_user.regs.filter_by(id=id).first():
+        current_user.remove_users_regex(id)
+        db.session.commit()
+        return json.dumps({'status': 'OK'})
+    else:
+        return json.dumps({'status': 'Fail'})
 
 
 @bp.route('/get_accounts', methods=['GET', 'POST'])
@@ -117,4 +121,11 @@ def get_keys():
     print(keys_dict)
     return json.dumps(keys_dict)
 
+
+@bp.route('/process', methods=['GET'])
+def parser():
+    tweeter_accounts = current_user.user_tweeter_accounts_for_p()
+    regs = current_user.user_regs_for_p()
+    parsed_tweets = scrap(tweeter_accounts, regs)
+    return json.dumps(parsed_tweets)
 

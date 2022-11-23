@@ -2,7 +2,7 @@ import re
 import snscrape.modules.twitter as snstwitter
 
 tweets = []
-limit = 30
+limit = 300
 
 
 def scrap(sources: list, regs):
