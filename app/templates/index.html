@@ -50,18 +50,18 @@
 <script src="http://ajax.microsoft.com/ajax/jquery.templates/beta1/jquery.tmpl.min.js"></script>
 <script id="accountTemplate" type="text/x-jQuery-tmpl">
     <li class="list-group-item">
-        ${account} - ${id} <button data-id=${id} class="test" onclick="DeleteAccounts(this)">del</button>
+        ${account} - <button data-id=${id} class="test" onclick="DeleteAccounts(this)">del</button>
     </li>
 </script>
 
 <script id="keysTemplate">
     <li class="list-group-item">
-        ${regex} - ${id} <button data-id=${id} class="test" onclick="DeleteKeys(this)">del</button>
+        ${regex} - <button data-id=${id} class="test" onclick="DeleteKeys(this)">del</button>
     </li>
 </script>
 
 <script id="tweetsTemplate">
-    <li>${content} <a href='${url}'></a> </li>
+    <li>${content} <a href='${url}'>link</a> </li>
 
 </script>
 
