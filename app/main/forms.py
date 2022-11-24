@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileAllowed
 from wtforms import StringField, SubmitField, PasswordField, FileField, TextAreaField
-from wtforms.validators import DataRequired, Email, EqualTo, ValidationError, Length
+from wtforms.validators import DataRequired, Email, EqualTo, ValidationError, Length, Regexp
 from app.models import Users, UsersRegex
 from flask_login import current_user
 
@@ -26,7 +26,9 @@ class EditProfileForm(FlaskForm):
 
 
 class TwitterAccountsForm(FlaskForm):
-    accounts = StringField('Input @TwitterAccount', validators=[DataRequired()])
+    accounts = StringField('@TwitterAccount', validators=[
+        DataRequired(), Regexp('^@\w+$', message='Twitter Account must start with @')
+    ])
     submit = SubmitField('Save')
 
 
@@ -42,7 +44,7 @@ class RegexForm(FlaskForm):
     def validate_regex(self, regex):
         reg = current_user.regs.filter_by(regex=regex.data).first()
         if reg is not None:
-            raise ValidationError('That key is already there')
+            raise ValidationError('That key is already exist')
 
 
 

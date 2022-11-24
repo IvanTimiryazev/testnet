@@ -126,6 +126,10 @@ def get_keys():
 def parser():
     tweeter_accounts = current_user.user_tweeter_accounts_for_p()
     regs = current_user.user_regs_for_p()
-    parsed_tweets = scrap(tweeter_accounts, regs)
-    return json.dumps(parsed_tweets)
+    if tweeter_accounts and regs:
+        parsed_tweets = scrap(tweeter_accounts, regs)
+        return json.dumps(parsed_tweets)
+    else:
+        return json.dumps({'content': 'First you must add some accounts and keys.'})
+
 

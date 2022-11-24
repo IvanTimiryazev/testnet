@@ -74,7 +74,8 @@
                type: 'GET'
            }).done(function(res) {
                var tweetsObj = JSON.parse(res);
-               $('#tweetsTemplate').tmpl(tweetsObj).appendTo( "#tweetsList" );
+               $( "#tweetsList" ).empty();
+               $( "#tweetsTemplate" ).tmpl(tweetsObj).appendTo( "#tweetsList" );
            });
        });
    });
