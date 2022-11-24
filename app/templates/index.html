@@ -75,7 +75,11 @@
            }).done(function(res) {
                var tweetsObj = JSON.parse(res);
                $( "#tweetsList" ).empty();
-               $( "#tweetsTemplate" ).tmpl(tweetsObj).appendTo( "#tweetsList" );
+               if(tweetsObj.length == 0) {
+                   alert('Found nothing');
+               }else {
+                   $( "#tweetsTemplate" ).tmpl(tweetsObj).appendTo( "#tweetsList" );
+               }
            });
        });
    });
