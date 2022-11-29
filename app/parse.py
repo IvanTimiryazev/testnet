@@ -1,11 +1,12 @@
 import re
 import snscrape.modules.twitter as snstwitter
 
-tweets = []
-limit = 300
+
+limit = 1000
 
 
 def scrap(sources: list, regs):
+    tweets = []
     for acc in sources:
         count = 0
         print(acc)

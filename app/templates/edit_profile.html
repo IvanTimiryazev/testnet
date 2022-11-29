@@ -1,29 +1,11 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
 
-{% block content %}
-    <form action="" method="post" enctype="multipart/form-data">
-        {{ form.hidden_tag() }}
-        <p>
-            {{ form.username.label }}
-            {{ form.username(size=32) }}
-            {% for error in form.username.errors %}
-            <span style="color: red;">{{ error }}</span>
-            {% endfor %}
-        </p>
-        <p>
-            {{ form.email.label }}
-            {{ form.email(size=32) }}
-            {% for error in form.email.errors %}
-            <span style="color: red;">{{ error }}</span>
-            {% endfor %}
-        </p>
-        <p>
-            {{ form.picture.label }}
-            {{ form.picture }}
-            {% for error in form.picture.errors %}
-            <span style="color: red;">{{ error }}</span>
-            {% endfor %}
-        </p>
-        <p>{{ form.submit() }}</p>
-    </form>
+{% block app_content %}
+    <h1>Edit Profile</h1>
+    <div class="row">
+        <div class="col-md-4">
+            {{ wtf.quick_form(form) }}
+        </div>
+    </div>
 {% endblock %}

@@ -1,172 +1,22 @@
-{% extends 'base.html' %}
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-
-{% block content %}
-<form action="" method="post">
-    {{ form.hidden_tag() }}
-    <p>
-        {{ form.accounts.label }}
-        {{ form.accounts(cols=32, rows=4) }}
-        {% for error in form.accounts.errors %}
-        <span style="color: black;">{{ error }}</span>
-        {% endfor %}
-    </p>
-    <p>
-        {{ form.submit() }}
-    </p>
-</form>
+{% extends "base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
 
 
-<ul id="accountList"></ul>
+{% block app_content %}
+    <div>
+    {{ wtf.quick_form(form) }}
+    </div>
+
+    <div>
+    <ul class="list-group list-group-flush" id="accountList"></ul>
+    </div>
 
 
-<hr>
-<form action="" method="post">
-    {{ form3.hidden_tag() }}
-    <p>
-        {{ form3.regex.label }}
-        {{ form3.regex(size=32) }}
-        {% for error in form3.regex.errors %}
-        <span style="color: red;">{{ error }}</span>
-        {% endfor %}
-    </p>
-    <p>{{ form3.submit() }}</p>
-</form>
+    {{ wtf.quick_form(form3) }}
 
-<ul id="keysList"></ul>
-
-<hr>
-<button id="butt">Get the tweets!</button>
+    <ul class="list-group list-group-flush" id="keysList"></ul>
 
 
-
-<ul id="tweetsList"></ul>
-
-
+    <button id="butt">Get the tweets!</button>
+    <ul class="list-group list-group-flush" id="tweetsList"></ul>
 {% endblock %}
-
-{% block script %}
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
-<script src="http://ajax.microsoft.com/ajax/jquery.templates/beta1/jquery.tmpl.min.js"></script>
-<script id="accountTemplate" type="text/x-jQuery-tmpl">
-    <li class="list-group-item">
-        ${account} - <button data-id=${id} class="test" onclick="DeleteAccounts(this)">del</button>
-    </li>
-</script>
-
-<script id="keysTemplate">
-    <li class="list-group-item">
-        ${regex} - <button data-id=${id} class="test" onclick="DeleteKeys(this)">del</button>
-    </li>
-</script>
-
-<script id="tweetsTemplate">
-    <li>${content} <a href='${url}'>link</a> </li>
-
-</script>
-
-
-<script>
-   $(document).ready(function() {
-       $('#butt').click(function() {
-           $.ajax({
-               url: '/process',
-               type: 'GET'
-           }).done(function(res) {
-               var tweetsObj = JSON.parse(res);
-               $( "#tweetsList" ).empty();
-               if(tweetsObj.length == 0) {
-                   alert('Found nothing');
-               }else {
-                   $( "#tweetsTemplate" ).tmpl(tweetsObj).appendTo( "#tweetsList" );
-               }
-           });
-       });
-   });
-
-
-   function GetBlogs() {
-       $.ajax({
-           url: '/get_accounts',
-           type: 'GET',
-           success: function(res) {
-               var accountObj = JSON.parse(res);
-               $( "#accountList" ).empty();
-               $('#accountTemplate').tmpl(accountObj).appendTo( "#accountList" );
-           }
-       });
-   }
-
-
-   $(document).ready(function() {
-       $.ajax({
-           url: '/get_accounts',
-           type: 'GET'
-       }).done(function(res) {
-           var accountObj = JSON.parse(res);
-           $('#accountTemplate').tmpl(accountObj).appendTo( "#accountList" );
-       });
-  });
-
-
-   function GetKeys() {
-       $.ajax({
-           url: '/get_keys',
-           type: 'GET',
-           success: function(res) {
-               var keysObj = JSON.parse(res);
-               $( "#keysList" ).empty();
-               $('#keysTemplate').tmpl(keysObj).appendTo( "#keysList" );
-           }
-       });
-   }
-
-
-   $(document).ready(function() {
-       $.ajax({
-           url: '/get_keys',
-           type: 'GET'
-       }).done(function(res) {
-           var keysObj = JSON.parse(res);
-           $('#keysTemplate').tmpl(keysObj).appendTo( "#keysList" );
-       });
-  });
-
-
-   function DeleteAccounts(elm) {
-       var id = $(elm).attr('data-id');
-       $.ajax({
-           url: '/delete_accounts',
-           data: {'id': id},
-           type: 'POST',
-           success: function(res) {
-               var result = JSON.parse(res);
-               if(result.status == 'OK') {
-                   alert('Deleted');
-                   GetBlogs();
-               }
-           }
-       });
-   }
-
-   function DeleteKeys(elm) {
-       var id = $(elm).attr('data-id');
-       $.ajax({
-           url: '/delete_keys',
-           data: {'id': id},
-           type: 'POST',
-           success: function(res) {
-               var result = JSON.parse(res);
-               if(result.status == 'OK') {
-                   alert('Deleted');
-                   GetKeys();
-               }
-           }
-       });
-   }
-
-
-</script>
-
-{% endblock %}
-
