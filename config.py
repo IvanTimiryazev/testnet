@@ -17,3 +17,4 @@ class Config(object):
     MAIL_PASSWORD = os.getenv('MAIL_PASSWORD')
     MAIL_USERNAME = os.getenv('MAIL_USERNAME')
     ADMINS = os.getenv('ADMINS')
+    TIME_INTERVAL = 30

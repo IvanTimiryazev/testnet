@@ -67,6 +67,7 @@
       <li class="list-group-item">${content} <a href='${url}'>link</a></li>
     </script>
 
+   {% if not current_user.is_anonymous %}
    <script>
    $(document).ready(function() {
        $('#butt').click(function() {
@@ -166,6 +167,7 @@
        });
    }
    </script>
+   {% endif %}
 
    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
    <script src="http://ajax.microsoft.com/ajax/jquery.templates/beta1/jquery.tmpl.min.js"></script>
