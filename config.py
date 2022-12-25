@@ -18,3 +18,4 @@ class Config(object):
     MAIL_USERNAME = os.getenv('MAIL_USERNAME')
     ADMINS = os.getenv('ADMINS')
     TIME_INTERVAL = 30
+    REDIS_URL = os.getenv('REDIS_URL') or 'redis://'

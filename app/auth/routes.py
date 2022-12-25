@@ -16,16 +16,16 @@ def login():
         return redirect(url_for('main.index'))
     form = LoginForm()
     if form.validate_on_submit():
-        user = Users.query.filter_by(username=form.username.data).first()
+        user = Users.query.filter_by(email=form.email.data).first()
         if user is None or not user.check_password(form.password.data):
-            flash('Не правильный логин или пароль')
+            flash('Wrong email or password')
             return redirect(url_for('auth.login'))
         login_user(user, remember=form.remember_me.data)
         next_page = request.args.get('next')
         if not next_page or url_parse(next_page).netloc != '':
             next_page = url_for('main.index')
         return redirect(next_page)
-    return render_template('auth/login.html', title='Логин', form=form)
+    return render_template('auth/login.html', title='Login', form=form)
 
 
 @bp.route('/logout')
@@ -40,16 +40,16 @@ def register():
         return redirect(url_for('main.index'))
     form = RegistrationForm()
     if form.validate_on_submit():
-        user = Users(username=form.username.data, email=form.email.data)
+        user = Users(email=form.email.data)
         user.set_password(form.password.data)
         db.session.add(user)
         db.session.commit()
         full_path = os.path.join(os.getcwd(), 'app/static', 'profile_files', 'profile_pics')
         if not os.path.exists(full_path):
             os.mkdir(full_path)
-        flash('Вы зарегистрированы!')
+        flash('You are new user now!')
         return redirect(url_for('auth.login'))
-    return render_template('auth/register.html', title='Регистрация', form=form)
+    return render_template('auth/register.html', title='Registration', form=form)
 
 
 @bp.route('/reset_password_request', methods=['GET', 'POST'])

@@ -6,7 +6,6 @@ from app import db
 from app.main import bp
 from app.models import Users, Source, UsersRegex
 from app.main.forms import EditProfileForm, TwitterAccountsForm, DeleteForm, RegexForm
-from app.parse import scrap
 
 from flask import render_template, url_for, flash, redirect, request, jsonify, abort, json
 from flask_login import login_required, current_user
@@ -40,15 +39,15 @@ def index():
         'index.html', title='Home page', form=form, form3=form3)
 
 
-@bp.route('/user/<username>')
+@bp.route('/user/<id>')
 @login_required
-def user_page(username):
+def user_page(id):
     form = EditProfileForm()
-    user = Users.query.filter_by(username=username).first_or_404()
-    if current_user.username != username:
+    user = Users.query.filter_by(id=id).first_or_404()
+    if current_user.id != int(id):
         abort(401)
     image_file = url_for('static', filename='profile_files/profile_pics/' + user.image_file)
-    return render_template('user_page.html', user=user, image=image_file, title=current_user.username, form=form)
+    return render_template('user_page.html', user=user, image=image_file, title='Profile', form=form)
 
 
 def save_pic(form_picture):
@@ -71,13 +70,11 @@ def edit_profile():
         if form.picture.data:
             picture_file = save_pic(form.picture.data)
             current_user.image_file = picture_file
-        current_user.username = form.username.data
         current_user.email = form.email.data
         db.session.commit()
         flash('Your changes have been saved')
-        return redirect(url_for('main.user_page', username=current_user.username))
+        return redirect(url_for('main.user_page', id=current_user.id))
     elif request.method == 'GET':
-        form.username.data = current_user.username
         form.email.data = current_user.email
     return render_template('edit_profile.html', title='Edit Profile', form=form)
 
@@ -122,14 +119,26 @@ def get_keys():
     return json.dumps(keys_dict)
 
 
+@bp.route('/get_last_results', methods=['GET', 'POST'])
+def get_last_results():
+    result = current_user.get_parse_results()
+    print(result)
+    return json.dumps(result)
+
+
 @bp.route('/process', methods=['GET'])
+@login_required
 def parser():
     tweeter_accounts = current_user.user_tweeter_accounts_for_p()
     regs = current_user.user_regs_for_p()
-    if tweeter_accounts and regs:
-        parsed_tweets = scrap(tweeter_accounts, regs)
-        return json.dumps(parsed_tweets)
+    if current_user.get_task_in_progress('scrap'):
+        return json.dumps({'content': 'A parsing task is currently in progress'})
     else:
-        return json.dumps({'content': 'First you must add some accounts and keys.'})
+        if tweeter_accounts and regs:
+            parsed_tweets = current_user.launch_tasks('scrap', 'parsing')
+            db.session.commit()
+            return json.dumps(parsed_tweets)
+        else:
+            return json.dumps({'content': 'First you must add some accounts and keys.'})
 
 
