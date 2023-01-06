@@ -19,4 +19,7 @@
 
     <button id="butt">Get the tweets!</button>
     <ul class="list-group list-group-flush" id="tweetsList"></ul>
+    {% if current_user.get_parse_results() %}
+        <button id="del_res">Delete Results</button>
+    {% endif %}
 {% endblock %}

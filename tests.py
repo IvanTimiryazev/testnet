@@ -23,13 +23,13 @@ class UserModelCase(unittest.TestCase):
         self.app_context.pop()
 
     def test_password_hash(self):
-        u = Users(username='Demon')
+        u = Users(email='lol@m.ru')
         u.set_password('man')
         self.assertFalse(u.check_password('woman'))
         self.assertTrue(u.check_password('man'))
 
     def test_user(self):
-        u = Users(username='Max')
+        u = Users(email='lol@m.ru')
         s = Source(account='@Gachi')
         s2 = Source(account='@Gucci')
         db.session.add(u)
@@ -38,7 +38,7 @@ class UserModelCase(unittest.TestCase):
         self.assertEqual(u.user_tweeter_accounts(), ['Gucci', 'Gachi'])
 
     def test_reset_passw(self):
-        u = Users(username='Vitya', email='lol@m.ru')
+        u = Users(email='lol@m.ru')
         db.session.add(u)
         db.session.commit()
         token = u.get_reset_password_token()

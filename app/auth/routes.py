@@ -54,22 +54,23 @@ def register():
 
 @bp.route('/reset_password_request', methods=['GET', 'POST'])
 def reset_password_request():
-    if current_user.is_authenticated:
-        return redirect(url_for('main.index'))
+    # if current_user.is_authenticated:
+    #     return redirect(url_for('main.index'))
     form = ResetPasswordRequestForm()
     if form.validate_on_submit():
         user = Users.query.filter_by(email=form.email.data).first()
         if user:
             send_password_reset_email(user)
         flash('Check your email for the instructions for reset your password')
-        return redirect(url_for('auth.login'))
+        if current_user.is_authenticated:
+            return redirect(url_for('main.user_page', id=current_user.id))
+        else:
+            return redirect(url_for('auth.login'))
     return render_template('auth/reset_password_request.html', form=form, title='Reset Password')
 
 
 @bp.route('/reset_password/<token>', methods=['GET', 'POST'])
 def reset_password(token):
-    if current_user.is_authenticated:
-        return redirect(url_for('main.index'))
     user = Users.verify_reset_password_token(token)
     if not user:
         return redirect(url_for('main.index'))
@@ -78,7 +79,10 @@ def reset_password(token):
         user.set_password(form.password.data)
         db.session.commit()
         flash('Your password has been reset')
-        return redirect(url_for('auth.login'))
+        if current_user.is_authenticated:
+            return redirect(url_for('main.user_page', id=current_user.id))
+        else:
+            return redirect(url_for('auth.login'))
     return render_template('auth/reset_password.html', form=form)
 
 

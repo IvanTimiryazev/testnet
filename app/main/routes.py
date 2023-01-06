@@ -5,7 +5,7 @@ from PIL import Image
 from app import db
 from app.main import bp
 from app.models import Users, Source, UsersRegex
-from app.main.forms import EditProfileForm, TwitterAccountsForm, DeleteForm, RegexForm
+from app.main.forms import EditProfileForm, TwitterAccountsForm, EditPasswordForm, RegexForm
 
 from flask import render_template, url_for, flash, redirect, request, jsonify, abort, json
 from flask_login import login_required, current_user
@@ -36,7 +36,7 @@ def index():
         else:
             flash('You cant add more than 10 keys')
     return render_template(
-        'index.html', title='Home page', form=form, form3=form3)
+        'index.html', title='Home page', form=form, form3=form3, user=current_user)
 
 
 @bp.route('/user/<id>')
@@ -77,6 +77,22 @@ def edit_profile():
     elif request.method == 'GET':
         form.email.data = current_user.email
     return render_template('edit_profile.html', title='Edit Profile', form=form)
+
+
+@bp.route('/edit_profile/password', methods=['GET', 'POST'])
+@login_required
+def edit_password():
+    form = EditPasswordForm()
+    if form.validate_on_submit():
+        if not current_user.check_password(form.current_password.data):
+            flash('Try again or click to reset')
+            return redirect(url_for('main.edit_password'))
+        else:
+            current_user.set_password(form.password.data)
+            db.session.commit()
+            flash('Your password has been update')
+            return redirect(url_for('main.user_page', id=current_user.id))
+    return render_template('edit_password.html', title='Edit Password', form=form)
 
 
 @bp.route('/delete_accounts', methods=['GET', 'POST'])
@@ -142,3 +158,12 @@ def parser():
             return json.dumps({'content': 'First you must add some accounts and keys.'})
 
 
+@bp.route('/delete_results', methods=['GET', 'POST'])
+@login_required
+def delete_results():
+    if current_user.results.all():
+        current_user.delete_pars_results()
+        db.session.commit()
+        return json.dumps({'status': 'OK'})
+    else:
+        return json.dumps({'status': 'Fail'})

@@ -177,6 +177,21 @@
            }
        });
    }
+
+   $(document).ready(function() {
+       $('#del_res').click(function() {
+           $.ajax({
+               url: '/delete_results',
+               type: 'GET'
+           }).done(function(res) {
+               var result = JSON.parse(res);
+               if(result.status == 'OK') {
+                   alert('Deleted');
+                   $( "#tweetsList" ).empty();
+               }
+           });
+       });
+   });
    </script>
    {% endif %}
 

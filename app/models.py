@@ -1,15 +1,14 @@
 import re
+from datetime import datetime
+from app import db, login
+from werkzeug.security import generate_password_hash, check_password_hash
+from flask_login import UserMixin
+from hashlib import md5
 import jwt
-from time import time
+from flask import current_app
+import time
 import redis
 import rq
-from flask_login import UserMixin
-from flask import current_app
-from werkzeug.security import generate_password_hash, check_password_hash
-import time
-from datetime import datetime
-
-from app import db, login
 
 
 class Users(UserMixin, db.Model):
@@ -23,7 +22,7 @@ class Users(UserMixin, db.Model):
     results = db.relationship('LastParseResults', backref='user', lazy='dynamic')
 
     def __repr__(self):
-        return f'<User: {self.username}, Email: {self.email}>'
+        return f'<Id: {self.id}, Email: {self.email}>'
 
     def set_password(self, password: str):
         self.password_hash = generate_password_hash(password)
@@ -59,8 +58,18 @@ class Users(UserMixin, db.Model):
 
     def get_reset_password_token(self, expires_in=600):
         return jwt.encode(
-            {'reset_password.txt': self.id, 'exp': time() + expires_in},
+            {'reset_password': self.id, 'exp': time.time() + expires_in},
             current_app.config['SECRET_KEY'], algorithm='HS256')
+
+    @staticmethod
+    def verify_reset_password_token(token):
+        try:
+            id = jwt.decode(
+                token, current_app.config['SECRET_KEY'],
+                algorithms=['HS256'])['reset_password']
+        except:
+            return
+        return Users.query.get(id)
 
     def save_parse_results(self, results):
         if LastParseResults.query.filter_by(user_id=self.id).all():
@@ -79,15 +88,8 @@ class Users(UserMixin, db.Model):
         ]
         return results
 
-    @staticmethod
-    def verify_reset_password_token(token):
-        try:
-            id = jwt.decode(
-                token, current_app.config['SECRET_KEY'],
-                algorithms=['HS256'])['reset_password.txt']
-        except:
-            return
-        return Users.query.get(id)
+    def delete_pars_results(self):
+        return self.results.delete()
 
     def launch_tasks(self, name, description, *args, **kwargs):
         job = current_app.task_queue.enqueue(

@@ -40,5 +40,12 @@ class RegexForm(FlaskForm):
             raise ValidationError('That key is already exist')
 
 
+class EditPasswordForm(FlaskForm):
+    current_password = PasswordField('Current Password', validators=[DataRequired()])
+    password = PasswordField('New Password', validators=[DataRequired()])
+    password2 = PasswordField('Repeat Password', validators=[DataRequired(), EqualTo('password')])
+    submit = SubmitField('Save')
+
+
 
 
