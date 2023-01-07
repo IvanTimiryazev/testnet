@@ -92,18 +92,21 @@ class Users(UserMixin, db.Model):
         return self.results.delete()
 
     def launch_tasks(self, name, description, *args, **kwargs):
-        job = current_app.task_queue.enqueue(
-            'app.parse.' + name, self.user_tweeter_accounts_for_p(),
-            self.user_regs_for_p(), *args, **kwargs)
-        task = Task(id=job.get_id(), name=name, description=description, user=self)
-        db.session.add(task)
-        db.session.commit()
-        while not job.is_finished:
-            time.sleep(2)
-        print(job.result)
-        if len(job.result) > 0:
-            self.save_parse_results(job.result)
-        return job.result
+        try:
+            job = current_app.task_queue.enqueue(
+                'app.parse.' + name, self.user_tweeter_accounts_for_p(),
+                self.user_regs_for_p(), *args, **kwargs)
+            task = Task(id=job.get_id(), name=name, description=description, user=self)
+            db.session.add(task)
+            db.session.commit()
+            while not job.is_finished:
+                time.sleep(2)
+            print(job.result)
+            if len(job.result) > 0:
+                self.save_parse_results(job.result)
+            return job.result
+        except:
+            return {'content': 'Something went wrong. Check the internet connection or VPN'}
 
     def get_tasks_in_progress(self):
         return self.tasks.filter_by(complete=False).all()

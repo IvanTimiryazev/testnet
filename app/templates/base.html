@@ -64,24 +64,30 @@
     </script>
 
     <script id="tweetsTemplate">
-      <li class="list-group-item">${content} <a href='${url}'>link</a></li>
+      <li class="list-group-item">${content} <a href='${url}'>Twitter</a></li>
     </script>
+
+<!--    <script id="LoaderTemplate">-->
+<!--      -->
+<!--    </script>-->
 
    {% if not current_user.is_anonymous %}
    <script>
    $(document).ready(function() {
        $('#butt').click(function() {
+           $( "#tweetsList" ).empty();
+           $( "#loader" ).html('<img src="{{ url_for('static', filename='loading.gif') }}">');
            $.ajax({
                url: '/process',
                type: 'GET'
            }).done(function(res) {
                var tweetsObj = JSON.parse(res);
-               $( "#tweetsList" ).empty();
                if(tweetsObj.length == 0) {
                    alert('Found nothing');
                }else {
                    $( "#tweetsTemplate" ).tmpl(tweetsObj).appendTo( "#tweetsList" );
                }
+               $( "#loader" ).hide();
            });
        });
    });
